@@ -1,2 +1,10 @@
+# Editor files #
 .idea
 
+# Java Specific Files #
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
