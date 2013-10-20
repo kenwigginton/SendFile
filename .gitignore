@@ -11,3 +11,6 @@
 
 # Mac Specific Files #
 .DS*
+
+# Library #
+lib/
