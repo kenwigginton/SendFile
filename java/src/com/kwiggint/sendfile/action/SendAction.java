@@ -1,4 +1,4 @@
-package com.kwiggint.sendfile;
+package com.kwiggint.sendfile.action;
 
 import java.io.IOException;
 import java.io.OutputStream;

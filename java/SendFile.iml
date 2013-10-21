@@ -13,6 +13,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="ice4j" level="project" />
     <orderEntry type="library" name="bcprov-jdk15on-149" level="project" />
+    <orderEntry type="library" name="guice-3.0" level="project" />
+    <orderEntry type="library" name="snakeyaml-1.11" level="project" />
   </component>
 </module>
 
