@@ -5,13 +5,9 @@ package com.kwiggint.sendfile.monitor;
  * provider web service.
  */
 public interface FileMonitor {
-  /**
-   * Polls the WS for pending files.
-   *
-   * @return <code>true</code> if there is a pending file transfer for this client.
-   */
-  public boolean checkForPendingFiles();
-
   /** Starts the FileMonitor's monitoring process. */
   public void start();
+
+  /** Stops the FileMonitor's monitoring process. */
+  public void stop();
 }

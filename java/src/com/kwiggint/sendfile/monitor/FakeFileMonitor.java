@@ -11,27 +11,24 @@ import java.util.concurrent.TimeUnit;
 /** Fake implementation of FileMonitor for testing purposes. */
 public class FakeFileMonitor implements FileMonitor {
   private final MonitorTask monitorTask;
-  private final int poolSize;
   private final int schedulingDelay;
+  private final ScheduledExecutorService scheduler;
 
   @Inject
   public FakeFileMonitor(MonitorTask monitorTask,
-                         @ConfigValue("monitor_pool_size")int poolSize,
-                         @ConfigValue("monitor_delay")int schedulingDelay) {
+                         @ConfigValue("monitor_pool_size") int poolSize,
+                         @ConfigValue("monitor_delay") int schedulingDelay) {
     this.monitorTask = monitorTask;
-    this.poolSize = poolSize;
     this.schedulingDelay = schedulingDelay;
-  }
-
-  @Override
-  public boolean checkForPendingFiles() {
-    return true;
+    scheduler = Executors.newScheduledThreadPool(poolSize);
   }
 
   @Override
   public void start() {
-    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(poolSize);
-    scheduler.scheduleWithFixedDelay(monitorTask, schedulingDelay, schedulingDelay,
-        TimeUnit.SECONDS);
+    scheduler.scheduleWithFixedDelay(monitorTask, 0, schedulingDelay, TimeUnit.SECONDS);
+  }
+
+  @Override public void stop() {
+    scheduler.shutdown();
   }
 }

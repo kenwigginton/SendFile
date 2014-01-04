@@ -1,38 +1,29 @@
 package com.kwiggint.sendfile.action;
 
+import com.kwiggint.sendfile.ConfigValue;
+import com.kwiggint.sendfile.model.PendingFile;
+
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 /** Action that sends a file across a Socket. */
-public class SendAction {
-  private static final int SOCKET_TIMEOUT_MILLIS = 30000;
-  private static final int DATA_CHUNK_SIZE = 8192;
+public class SendAction implements Runnable {
+  @Inject @ConfigValue("send_timeout")
+  private static int socketTimeoutMillis;
+  @Inject @ConfigValue("send_chunk_size")
+  private static int dataChunkSize;
+  private PendingFile pendingFile;
 
   /**
-   * Attempts to send the specified file to the specified <code>InetSocketAddress</code>.
-   *
-   * @param socketAddress the InetSocketAddress at which bytes will be sent.
-   * @param file          the file from which bytes will be read.
-   * @return true if <code>file</code> was sent successfully in its entirety.
+   * @param pendingFile the file to be sent wrapped with sending information.
+   *                    The file path must be specified completely either absolutely or relatively.
    */
-  public static boolean send(InetSocketAddress socketAddress, RandomAccessFile file) {
-    try {
-      ServerSocket serverSocket = new ServerSocket(socketAddress.getPort());
-      serverSocket.setSoTimeout(SOCKET_TIMEOUT_MILLIS);
-      // Blocks until a connection is made on specified socket or until TIMEOUT is reached.
-      Socket socket = serverSocket.accept();
-      OutputStream outputStream = socket.getOutputStream();
-      sendByteArray(file, outputStream);
-      outputStream.close();
-      return true;
-    } catch (IOException e) {
-      System.err.println(e);
-      return false;
-    }
+  public SendAction(PendingFile pendingFile) {
+    this.pendingFile = pendingFile;
   }
 
   /**
@@ -45,10 +36,30 @@ public class SendAction {
    *                     thrown if the output stream is closed.
    */
   static void sendByteArray(RandomAccessFile file, OutputStream out) throws IOException {
-    byte[] buf = new byte[DATA_CHUNK_SIZE];
+    byte[] buf = new byte[dataChunkSize];
     int len = 0;
     while ((len = file.read(buf)) != -1) {
       out.write(buf, 0, len);
+    }
+  }
+
+  /**
+   * Attempts to send the specified file to the specified <code>InetSocketAddress</code>.
+   * The file's path must be specified completely either absolutely or relatively.
+   *
+   * @return true if <code>pendingFile</code> was sent successfully in its entirety.
+   */
+  public void run() {
+    try {
+      ServerSocket serverSocket = new ServerSocket(pendingFile.getSender().getPort());
+      serverSocket.setSoTimeout(socketTimeoutMillis);
+      // Blocks until a connection is made on specified socket or until TIMEOUT is reached.
+      Socket socket = serverSocket.accept();
+      OutputStream outputStream = socket.getOutputStream();
+      sendByteArray(new RandomAccessFile(pendingFile.getFileName(), "r"), outputStream);
+      outputStream.close();
+    } catch (IOException e) {
+      System.err.println(e); //TODO log error appropriately
     }
   }
 }

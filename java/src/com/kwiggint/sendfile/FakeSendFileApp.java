@@ -3,10 +3,9 @@ package com.kwiggint.sendfile;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
 import com.kwiggint.sendfile.monitor.FileMonitor;
 
-/** The Main app for SendFile. */
+/** The Fake main app for SendFile. */
 public class FakeSendFileApp {
   public static void main(String args[]) {
     Injector injector = Guice.createInjector(new FakeSendFileModule());

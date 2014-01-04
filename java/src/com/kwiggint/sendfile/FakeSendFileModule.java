@@ -1,12 +1,11 @@
 package com.kwiggint.sendfile;
 
 import com.google.inject.AbstractModule;
+import com.kwiggint.sendfile.action.SendAction;
 import com.kwiggint.sendfile.api.FakeSendFileApi;
 import com.kwiggint.sendfile.api.SendFileApi;
 import com.kwiggint.sendfile.monitor.FakeFileMonitor;
 import com.kwiggint.sendfile.monitor.FileMonitor;
-import com.kwiggint.sendfile.task.FakeReceiveTask;
-import com.kwiggint.sendfile.task.ReceiveTask;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -17,7 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-/** Class Documentation */
+/** Fake Guice module that binds all necessary fake classes. */
 public class FakeSendFileModule extends AbstractModule {
   private static final String CONFIG_LOCATION = "java/src/resources/config.yaml";
 
@@ -25,8 +24,8 @@ public class FakeSendFileModule extends AbstractModule {
   protected void configure() {
     bind(FileMonitor.class).to(FakeFileMonitor.class);
     bind(SendFileApi.class).to(FakeSendFileApi.class);
-    bind(ReceiveTask.class).to(FakeReceiveTask.class);
 
+    // TODO: move configuration code to separate entity.
     // Load configuration files.
     Yaml yaml = new Yaml();
     InputStream inputStream;
@@ -35,12 +34,13 @@ public class FakeSendFileModule extends AbstractModule {
     } catch (FileNotFoundException e) {
       throw new AssertionError(e.getMessage());
     }
+
+    // TODO: get rid of all the nasty typecasting!
     // Load all separate documents in yaml.
     for (Object data : yaml.loadAll(inputStream)) {
-      LinkedHashMap<String, Object> map;
-      map = (LinkedHashMap<String, Object>) data; // TODO: get rid of this nastiness!
+      Set<Map.Entry<String, Object>> entrySet;
+      entrySet = ((LinkedHashMap<String, Object>) data).entrySet();
       // Bind all configuration values from the documents.
-      Set<Map.Entry<String, Object>> entrySet = map.entrySet();
       for (Map.Entry<String, Object> e : entrySet) {
         if (e.getValue() instanceof Integer)
           bindConstant().annotatedWith(new ConfigValueImpl(e.getKey())).to((int) e.getValue());
@@ -49,5 +49,6 @@ public class FakeSendFileModule extends AbstractModule {
         else throw new AssertionError("Unknown Yaml type");
       }
     }
+    requestStaticInjection(SendAction.class);
   }
 }
