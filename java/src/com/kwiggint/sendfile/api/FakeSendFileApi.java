@@ -22,14 +22,35 @@ public class FakeSendFileApi implements SendFileApi {
     return fileHash;
   }
 
+  public FakeSendFileApi setIncomingFileHash(DigestSHA3 fileHash) {
+    this.fileHash = fileHash;
+    return this;
+  }
+
   @Override
   public String getIncomingFileName() {
     return fileName;
   }
 
+  /**
+   * Test functionality method which sets the incoming file name.
+   *
+   * @param fileName
+   * @return
+   */
+  public FakeSendFileApi setIncomingFileName(String fileName) {
+    this.fileName = fileName;
+    return this;
+  }
+
   @Override
   public long getIncomingFileSize() {
     return fileSize;
+  }
+
+  public FakeSendFileApi setIncomingFileSize(long fileSize) {
+    this.fileSize = fileSize;
+    return this;
   }
 
   @Override
@@ -40,21 +61,6 @@ public class FakeSendFileApi implements SendFileApi {
   @Override
   public boolean hasPendingTransfers() {
     return true;
-  }
-
-  public FakeSendFileApi setIncomingFileName(String fileName) {
-    this.fileName = fileName + 1;
-    return this;
-  }
-
-  public FakeSendFileApi setIncomingFileHash(DigestSHA3 fileHash) {
-    this.fileHash = fileHash;
-    return this;
-  }
-
-  public FakeSendFileApi setIncomingFileSize(long fileSize) {
-    this.fileSize = fileSize;
-    return this;
   }
 
   public FakeSendFileApi setSender(InetSocketAddress sender) {

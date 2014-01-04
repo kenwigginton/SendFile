@@ -24,7 +24,7 @@ public class ReceiveAction {
       InputStream inputStream = socket.getInputStream();
       RandomAccessFile file = new RandomAccessFile(pendingFile.getFileName(), "rw");
       receiveByteArray(file, inputStream, socket.getReceiveBufferSize());
-      inputStream.close();
+      socket.close();
       return true;
     } catch (IOException e) {
       System.err.println(e);

@@ -57,7 +57,7 @@ public class SendAction implements Runnable {
       Socket socket = serverSocket.accept();
       OutputStream outputStream = socket.getOutputStream();
       sendByteArray(new RandomAccessFile(pendingFile.getFileName(), "r"), outputStream);
-      outputStream.close();
+      serverSocket.close();
     } catch (IOException e) {
       System.err.println(e); //TODO log error appropriately
     }

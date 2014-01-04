@@ -5,6 +5,7 @@ import com.kwiggint.sendfile.task.MonitorTask;
 
 import javax.inject.Inject;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +14,7 @@ public class FakeFileMonitor implements FileMonitor {
   private final MonitorTask monitorTask;
   private final int schedulingDelay;
   private final ScheduledExecutorService scheduler;
+  private Future<?> future;
 
   @Inject
   public FakeFileMonitor(MonitorTask monitorTask,
@@ -25,10 +27,10 @@ public class FakeFileMonitor implements FileMonitor {
 
   @Override
   public void start() {
-    scheduler.scheduleWithFixedDelay(monitorTask, 0, schedulingDelay, TimeUnit.SECONDS);
+    future = scheduler.scheduleWithFixedDelay(monitorTask, 0, schedulingDelay, TimeUnit.SECONDS);
   }
 
   @Override public void stop() {
-    scheduler.shutdown();
+    future.cancel(true);
   }
 }
