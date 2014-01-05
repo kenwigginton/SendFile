@@ -23,6 +23,7 @@ public class ReceiveAction {
       // Blocks until a connection is made on specified socket or until TIMEOUT is reached.
       InputStream inputStream = socket.getInputStream();
       RandomAccessFile file = new RandomAccessFile(pendingFile.getFileName(), "rw");
+      System.out.println("Receiving file " + pendingFile.getFileName());
       receiveByteArray(file, inputStream, socket.getReceiveBufferSize());
       socket.close();
       return true;
@@ -45,8 +46,11 @@ public class ReceiveAction {
   static void receiveByteArray(RandomAccessFile file, InputStream in,
                                int bufferSize) throws IOException {
     byte[] buf = new byte[bufferSize];
+    int i = 0;
     while (in.read(buf) != -1) {
+      System.out.println("Receive While #" + i);
       file.write(buf);
     }
+    System.out.println("Receive While Completed");
   }
 }

@@ -16,6 +16,7 @@ public class FakeSendFileApi implements SendFileApi {
   private DigestSHA3 fileHash;
   private long fileSize;
   private InetSocketAddress sender;
+  private boolean hasPendingTransfer = false;
 
   @Override
   public DigestSHA3 getIncomingFileHash() {
@@ -34,12 +35,14 @@ public class FakeSendFileApi implements SendFileApi {
 
   /**
    * Test functionality method which sets the incoming file name.
+   * Also sets hasPendingTransfers to true.
    *
    * @param fileName
    * @return
    */
   public FakeSendFileApi setIncomingFileName(String fileName) {
     this.fileName = fileName;
+    this.hasPendingTransfer = true;
     return this;
   }
 
@@ -55,12 +58,13 @@ public class FakeSendFileApi implements SendFileApi {
 
   @Override
   public PendingFile getNextPendingFile() {
+    this.hasPendingTransfer = false;
     return new PendingFile(fileName, fileHash, fileSize, sender);
   }
 
   @Override
   public boolean hasPendingTransfers() {
-    return true;
+    return hasPendingTransfer;
   }
 
   public FakeSendFileApi setSender(InetSocketAddress sender) {

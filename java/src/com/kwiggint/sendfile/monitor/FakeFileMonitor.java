@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 public class FakeFileMonitor implements FileMonitor {
   private final MonitorTask monitorTask;
   private final int schedulingDelay;
-  private final ScheduledExecutorService scheduler;
-  private Future<?> future;
+  private ScheduledExecutorService scheduler;
+  private final int poolSize;
 
   @Inject
   public FakeFileMonitor(MonitorTask monitorTask,
@@ -22,15 +22,16 @@ public class FakeFileMonitor implements FileMonitor {
                          @ConfigValue("monitor_delay") int schedulingDelay) {
     this.monitorTask = monitorTask;
     this.schedulingDelay = schedulingDelay;
-    scheduler = Executors.newScheduledThreadPool(poolSize);
+    this.poolSize = poolSize;
   }
 
   @Override
   public void start() {
-    future = scheduler.scheduleWithFixedDelay(monitorTask, 0, schedulingDelay, TimeUnit.SECONDS);
+    scheduler = Executors.newScheduledThreadPool(poolSize);
+    scheduler.scheduleAtFixedRate(monitorTask, 0, schedulingDelay, TimeUnit.SECONDS);
   }
 
   @Override public void stop() {
-    future.cancel(true);
+    scheduler.shutdown();
   }
 }

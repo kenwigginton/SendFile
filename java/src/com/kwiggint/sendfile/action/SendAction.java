@@ -38,9 +38,12 @@ public class SendAction implements Runnable {
   static void sendByteArray(RandomAccessFile file, OutputStream out) throws IOException {
     byte[] buf = new byte[dataChunkSize];
     int len = 0;
+    int i = 0;
     while ((len = file.read(buf)) != -1) {
+      System.out.println("Send While #" + i);
       out.write(buf, 0, len);
     }
+    System.out.println("Send While Completed");
   }
 
   /**
@@ -55,6 +58,7 @@ public class SendAction implements Runnable {
       serverSocket.setSoTimeout(socketTimeoutMillis);
       // Blocks until a connection is made on specified socket or until TIMEOUT is reached.
       Socket socket = serverSocket.accept();
+      System.out.println("Sending file " + pendingFile.getFileName());
       OutputStream outputStream = socket.getOutputStream();
       sendByteArray(new RandomAccessFile(pendingFile.getFileName(), "r"), outputStream);
       serverSocket.close();
