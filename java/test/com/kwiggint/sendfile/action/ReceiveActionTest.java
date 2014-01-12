@@ -60,21 +60,24 @@ public class ReceiveActionTest {
 
   @Test
   public void testSendReceiveAll() throws Exception {
-    for (int i = 0; i < testFiles.size(); i++) {
-      String s = (String) testFiles.get(i);
+    for (String s : (ArrayList<String>)testFiles) {
+      System.out.println("file: " + s);
       ((FakeSendFileApi) sendFileApi).setSender(new InetSocketAddress(LOCALHOST,
           LOCALPORT)).setIncomingFileName(s + incrAppend());
       PendingFile pendingFile = new PendingFile(TEST_PATH + s, new InetSocketAddress(LOCALHOST,
           LOCALPORT));
-      SendAction sendAction = new SendAction(pendingFile);
+      Thread sendAction = new Thread(new SendAction(pendingFile));
+      synchronized (sendAction){
+        sendAction.start();
+        sendAction.wait(TIMEOUT_MS);
+      }
 
-      new Thread(sendAction).start();
-      Thread.sleep(TIMEOUT_MS);
       File file = new File(s + fileAppend);
       assertTrue(file.exists());
       assertTrue(file.isFile());
       assertTrue(file.canRead());
       assertTrue(file.delete());
+      System.out.println("Success for file " + s);
     }
   }
 

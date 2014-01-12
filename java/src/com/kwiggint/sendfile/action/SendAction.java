@@ -60,7 +60,7 @@ public class SendAction implements Runnable {
    *
    * @return true if <code>pendingFile</code> was sent successfully in its entirety.
    */
-  public void run() {
+  public synchronized void run() {
     try {
       ServerSocket serverSocket = new ServerSocket(pendingFile.getSender().getPort());
       serverSocket.setSoTimeout(socketTimeoutMillis);
@@ -70,7 +70,7 @@ public class SendAction implements Runnable {
       OutputStream outputStream = socket.getOutputStream();
       sendByteArray(new RandomAccessFile(pendingFile.getFileName(), "r"), outputStream);
       serverSocket.close();
-//      notifyAll();
+      notify();
     } catch (IOException e) {
       System.err.println(e); // TODO log error appropriately
     }
