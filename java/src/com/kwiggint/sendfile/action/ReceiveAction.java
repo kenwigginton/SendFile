@@ -48,9 +48,7 @@ public class ReceiveAction {
     byte[] buf = new byte[bufferSize];
     int i = 0;
     while (in.read(buf) != -1) {
-      System.out.println("Receive While #" + i);
       file.write(buf);
     }
-    System.out.println("Receive While Completed");
   }
 }

@@ -4,13 +4,17 @@ import com.kwiggint.sendfile.ConfigValue;
 import com.kwiggint.sendfile.model.PendingFile;
 
 import javax.inject.Inject;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-/** Action that sends a file across a Socket. */
+/**
+ * Action that sends a file across a Socket. Fails to be constructed if the sender does not
+ * actually possess the file to be sent.
+ */
 public class SendAction implements Runnable {
   @Inject @ConfigValue("send_timeout")
   private static int socketTimeoutMillis;
@@ -19,10 +23,16 @@ public class SendAction implements Runnable {
   private PendingFile pendingFile;
 
   /**
+   * Constructor for a new SendAction that takes a {@link PendingFile} as argument. Since the
+   *
    * @param pendingFile the file to be sent wrapped with sending information.
    *                    The file path must be specified completely either absolutely or relatively.
+   * @throws AssertionError if the pending file does not actually exist for this sender.
    */
-  public SendAction(PendingFile pendingFile) {
+  public SendAction(PendingFile pendingFile) throws FileNotFoundException {
+    if (!pendingFile.exists())
+      throw new FileNotFoundException("Cannot send file " + pendingFile.getFileName() +
+          " because it doesn't exist.");
     this.pendingFile = pendingFile;
   }
 
@@ -40,10 +50,8 @@ public class SendAction implements Runnable {
     int len = 0;
     int i = 0;
     while ((len = file.read(buf)) != -1) {
-      System.out.println("Send While #" + i);
       out.write(buf, 0, len);
     }
-    System.out.println("Send While Completed");
   }
 
   /**
@@ -63,7 +71,7 @@ public class SendAction implements Runnable {
       sendByteArray(new RandomAccessFile(pendingFile.getFileName(), "r"), outputStream);
       serverSocket.close();
     } catch (IOException e) {
-      System.err.println(e); //TODO log error appropriately
+      System.err.println(e); // TODO log error appropriately
     }
   }
 }

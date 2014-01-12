@@ -17,7 +17,6 @@ public class MonitorTask implements Runnable {
 
   @Override
   public void run() {
-    System.out.println("Running MonitorTask");
     if (sendFileApi.hasPendingTransfers()) {
       PendingFile pendingFile = sendFileApi.getNextPendingFile();
       ReceiveAction.receive(pendingFile);
