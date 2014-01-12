@@ -8,29 +8,11 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 
 /** Action that receives a <code>PendingFile</code>. */
-public class ReceiveAction {
-  /**
-   * Attempts to receive the specified <code>PendingFile</code>.
-   *
-   * @param pendingFile the <code>PendingFile</code> to be received.
-   * @return true if <code>file</code> was received successfully in its entirety.
-   */
-  public static boolean receive(PendingFile pendingFile) {
-    try {
-      Socket socket = new Socket(pendingFile.getSender().getHostName(),
-          pendingFile.getSender().getPort());
+public class ReceiveAction implements Runnable {
+  private final PendingFile pendingFile;
 
-      // Blocks until a connection is made on specified socket or until TIMEOUT is reached.
-      InputStream inputStream = socket.getInputStream();
-      RandomAccessFile file = new RandomAccessFile(pendingFile.getFileName(), "rw");
-      System.out.println("Receiving file " + pendingFile.getFileName());
-      receiveByteArray(file, inputStream, socket.getReceiveBufferSize());
-      socket.close();
-      return true;
-    } catch (IOException e) {
-      System.err.println(e);
-      return false;
-    }
+  public ReceiveAction(PendingFile pendingFile) {
+    this.pendingFile = pendingFile;
   }
 
   /**
@@ -49,6 +31,24 @@ public class ReceiveAction {
     int i = 0;
     while (in.read(buf) != -1) {
       file.write(buf);
+    }
+  }
+
+  /** Attempts to receive the specified <code>PendingFile</code>. */
+  @Override
+  public void run() {
+    try {
+      Socket socket = new Socket(pendingFile.getSender().getHostName(),
+          pendingFile.getSender().getPort());
+
+      // Blocks until a connection is made on specified socket or until TIMEOUT is reached.
+      InputStream inputStream = socket.getInputStream();
+      RandomAccessFile file = new RandomAccessFile(pendingFile.getFileName(), "rw");
+      System.out.println("Receiving file " + pendingFile.getFileName());
+      receiveByteArray(file, inputStream, socket.getReceiveBufferSize());
+      socket.close();
+    } catch (IOException e) {
+      System.err.println(e);
     }
   }
 }

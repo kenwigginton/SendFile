@@ -2,7 +2,6 @@ package com.kwiggint.sendfile.task;
 
 import com.kwiggint.sendfile.action.ReceiveAction;
 import com.kwiggint.sendfile.api.SendFileApi;
-import com.kwiggint.sendfile.model.PendingFile;
 
 import javax.inject.Inject;
 
@@ -18,8 +17,8 @@ public class MonitorTask implements Runnable {
   @Override
   public void run() {
     if (sendFileApi.hasPendingTransfers()) {
-      PendingFile pendingFile = sendFileApi.getNextPendingFile();
-      ReceiveAction.receive(pendingFile);
+      Thread receiveAction = new Thread(new ReceiveAction(sendFileApi.getNextPendingFile()));
+      receiveAction.start();
     }
   }
 }

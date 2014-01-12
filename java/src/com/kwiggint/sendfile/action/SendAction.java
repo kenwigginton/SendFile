@@ -20,7 +20,7 @@ public class SendAction implements Runnable {
   private static int socketTimeoutMillis;
   @Inject @ConfigValue("send_chunk_size")
   private static int dataChunkSize;
-  private PendingFile pendingFile;
+  private final PendingFile pendingFile;
 
   /**
    * Constructor for a new SendAction that takes a {@link PendingFile} as argument. Since the
@@ -70,6 +70,7 @@ public class SendAction implements Runnable {
       OutputStream outputStream = socket.getOutputStream();
       sendByteArray(new RandomAccessFile(pendingFile.getFileName(), "r"), outputStream);
       serverSocket.close();
+//      notifyAll();
     } catch (IOException e) {
       System.err.println(e); // TODO log error appropriately
     }

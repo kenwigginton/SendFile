@@ -73,4 +73,28 @@ public class PendingFile {
         ", sender=" + sender +
         '}';
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    PendingFile that = (PendingFile) o;
+
+    if (fileSize != that.fileSize) return false;
+    if (fileHash != null ? !fileHash.equals(that.fileHash) : that.fileHash != null) return false;
+    if (!fileName.equals(that.fileName)) return false;
+    if (!sender.equals(that.sender)) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = fileName.hashCode();
+    result = 31 * result + sender.hashCode();
+    result = 31 * result + (fileHash != null ? fileHash.hashCode() : 0);
+    result = 31 * result + (int) (fileSize ^ (fileSize >>> 32));
+    return result;
+  }
 }

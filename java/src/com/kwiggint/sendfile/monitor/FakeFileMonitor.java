@@ -18,8 +18,8 @@ public class FakeFileMonitor implements FileMonitor {
 
   @Inject
   public FakeFileMonitor(MonitorTask monitorTask,
-                         @ConfigValue("monitor_pool_size") int poolSize,
-                         @ConfigValue("monitor_delay") int schedulingDelay) {
+                         @ConfigValue("fake_monitor_pool_size") int poolSize,
+                         @ConfigValue("fake_monitor_delay") int schedulingDelay) {
     this.monitorTask = monitorTask;
     this.schedulingDelay = schedulingDelay;
     this.poolSize = poolSize;

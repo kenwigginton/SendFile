@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -38,17 +39,25 @@ public class FakeSendFileModule extends AbstractModule {
     // TODO: get rid of all the nasty typecasting!
     // Load all separate documents in yaml.
     for (Object data : yaml.loadAll(inputStream)) {
-      Set<Map.Entry<String, Object>> entrySet;
-      entrySet = ((LinkedHashMap<String, Object>) data).entrySet();
-      // Bind all configuration values from the documents.
-      for (Map.Entry<String, Object> e : entrySet) {
-        if (e.getValue() instanceof Integer)
-          bindConstant().annotatedWith(new ConfigValueImpl(e.getKey())).to((int) e.getValue());
-        else if (e.getValue() instanceof String)
-          bindConstant().annotatedWith(new ConfigValueImpl(e.getKey())).to((String) e.getValue());
-        else throw new AssertionError("Unknown Yaml type");
-      }
+      processYamlEntrySet(((LinkedHashMap<String, Object>) data).entrySet());
     }
     requestStaticInjection(SendAction.class);
+  }
+
+  private void processYamlEntrySet(Set<Map.Entry<String, Object>> entrySet) {
+    // Bind all configuration values from the documents.
+    for (Map.Entry<String, Object> e : entrySet) {
+      final ConfigValueImpl annotation = new ConfigValueImpl(e.getKey());
+      final Object value = e.getValue();
+      if (value instanceof Integer)
+        bindConstant().annotatedWith(annotation).to((int) value);
+      else if (value instanceof String)
+        bindConstant().annotatedWith(annotation).to((String) value);
+      else if (value instanceof ArrayList)
+        bind(ArrayList.class).annotatedWith(annotation).toInstance((ArrayList) value);
+      else if (value instanceof LinkedHashMap)
+        processYamlEntrySet(((LinkedHashMap<String, Object>) value).entrySet());
+      else throw new AssertionError("Unknown Yaml type");
+    }
   }
 }
