@@ -1,43 +1,21 @@
 package com.kwiggint.sendfile.api;
 
 import com.kwiggint.sendfile.model.PendingFile;
-import org.bouncycastle.jcajce.provider.digest.SHA3;
+import retrofit.http.DELETE;
+import retrofit.http.GET;
+import retrofit.http.Header;
+import retrofit.http.Path;
 
-/** Connects to the SendFile WS to perform REST requests. */
-public interface SendFileApi { // TODO: add tokens and UUIDs to requests.
+import java.util.Queue;
 
-  /**
-   * Polls for pending files.
-   *
-   * @return <code>true</code> if there is a pending file transfer for this client.
-   */
-  public boolean hasPendingTransfers();
+/**
+ * Retrofitted API Interface.
+ * Used to perform calls on the site's RESTful API endpoints.
+ */
+public interface SendFileApi { //TODO: Add authentication to service.
+  @GET("/{user}/pending")
+  Queue<PendingFile> pendingFiles(@Path("user") String user, @Header("password") String password);
 
-  /**
-   * Retrieves the specified file's SHA3 hash.
-   *
-   * @return the unique SHA3 digest that the incoming file should match.
-   */
-  public SHA3.DigestSHA3 getIncomingFileHash();
-
-  /**
-   * Retrieves the specified file's name.
-   *
-   * @return the file name of the incoming file.
-   */
-  public String getIncomingFileName();
-
-  /**
-   * Retrieves the specified file's size.
-   *
-   * @return the size of the incoming file.
-   */
-  public long getIncomingFileSize();
-
-  /**
-   * Retrieves the next pending file from the server's pending file queue.
-   *
-   * @return the next pending file for this user.
-   */
-  public PendingFile getNextPendingFile();
+  @DELETE("/{user}/pending")
+  boolean removePendingFile(@Path("user") String user, @Header("password") String password);
 }

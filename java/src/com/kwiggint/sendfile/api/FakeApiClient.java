@@ -1,7 +1,7 @@
 package com.kwiggint.sendfile.api;
 
 import com.kwiggint.sendfile.model.PendingFile;
-import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
+import org.bouncycastle.crypto.digests.SHA224Digest;
 
 import javax.inject.Singleton;
 import java.net.InetSocketAddress;
@@ -11,26 +11,16 @@ import java.net.InetSocketAddress;
  * testing of sending files by circumventing the API.
  */
 @Singleton
-public class FakeSendFileApi implements SendFileApi {
+public class FakeApiClient implements ApiClient {
   private String fileName;
-  private DigestSHA3 fileHash;
+  private SHA224Digest fileHash;
   private long fileSize;
   private InetSocketAddress sender;
   private boolean hasPendingTransfer = false;
 
-  @Override
-  public DigestSHA3 getIncomingFileHash() {
-    return fileHash;
-  }
-
-  public FakeSendFileApi setIncomingFileHash(DigestSHA3 fileHash) {
+  public FakeApiClient setIncomingFileHash(SHA224Digest fileHash) {
     this.fileHash = fileHash;
     return this;
-  }
-
-  @Override
-  public String getIncomingFileName() {
-    return fileName;
   }
 
   /**
@@ -40,18 +30,13 @@ public class FakeSendFileApi implements SendFileApi {
    * @param fileName
    * @return
    */
-  public FakeSendFileApi setIncomingFileName(String fileName) {
+  public FakeApiClient setIncomingFileName(String fileName) {
     this.fileName = fileName;
     this.hasPendingTransfer = true;
     return this;
   }
 
-  @Override
-  public long getIncomingFileSize() {
-    return fileSize;
-  }
-
-  public FakeSendFileApi setIncomingFileSize(long fileSize) {
+  public FakeApiClient setIncomingFileSize(long fileSize) {
     this.fileSize = fileSize;
     return this;
   }
@@ -62,12 +47,16 @@ public class FakeSendFileApi implements SendFileApi {
     return new PendingFile(fileName, fileHash, fileSize, sender);
   }
 
+  @Override public boolean removePendingFile(PendingFile pendingFile) {
+    return true;
+  }
+
   @Override
   public boolean hasPendingTransfers() {
     return hasPendingTransfer;
   }
 
-  public FakeSendFileApi setSender(InetSocketAddress sender) {
+  public FakeApiClient setSender(InetSocketAddress sender) {
     this.sender = sender;
     return this;
   }

@@ -1,6 +1,9 @@
 fake_monitor_pool_size: 1
 fake_monitor_delay: 1
 
+real_monitor_pool_size: 3
+real_monitor_delay: 3
+
 send_timeout: 30000
 send_chunk_size: 8192
 
@@ -8,3 +11,5 @@ test-timeout-ms: 1000
 test-files:
   - "basic.txt"
   - "img.png"
+
+api_endpoint_url: "sendfiles.herokuapp.com"

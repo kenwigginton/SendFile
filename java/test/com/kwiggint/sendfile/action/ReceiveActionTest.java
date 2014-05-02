@@ -2,8 +2,8 @@ package com.kwiggint.sendfile.action;
 
 import com.kwiggint.sendfile.ConfigValue;
 import com.kwiggint.sendfile.FakeSendFileModule;
-import com.kwiggint.sendfile.api.FakeSendFileApi;
-import com.kwiggint.sendfile.api.SendFileApi;
+import com.kwiggint.sendfile.api.FakeApiClient;
+import com.kwiggint.sendfile.api.ApiClient;
 import com.kwiggint.sendfile.model.PendingFile;
 import com.kwiggint.sendfile.monitor.FileMonitor;
 import org.testng.annotations.AfterMethod;
@@ -31,7 +31,7 @@ public class ReceiveActionTest {
   private static final InetSocketAddress FAKE_SENDER_2 = new InetSocketAddress(LOCALHOST,
       LOCALPORT + 1);
   private static long TIMEOUT_MS = 2000;
-  @Inject SendFileApi sendFileApi;
+  @Inject ApiClient apiClient;
   @Inject FileMonitor fileMonitor;
   @Inject @ConfigValue("test-files") ArrayList testFiles;
   private int fileAppend = -1;
@@ -42,35 +42,44 @@ public class ReceiveActionTest {
   }
 
   @BeforeMethod
-  public void setup() {
+  public void setUp() {
     fileMonitor.start();
   }
 
   @Test
   public void testSendFileApiHasPendingFile() {
-    ((FakeSendFileApi) sendFileApi).setIncomingFileName(FAKE_FILE_1).setSender(FAKE_SENDER_1);
-    assertTrue(sendFileApi.hasPendingTransfers());
-    assertEquals(sendFileApi.getNextPendingFile(), new PendingFile(FAKE_FILE_1, FAKE_SENDER_1));
-    assertFalse(sendFileApi.hasPendingTransfers());
-    ((FakeSendFileApi) sendFileApi).setIncomingFileName(FAKE_FILE_2).setSender(FAKE_SENDER_2);
-    assertTrue(sendFileApi.hasPendingTransfers());
-    assertEquals(sendFileApi.getNextPendingFile(), new PendingFile(FAKE_FILE_2, FAKE_SENDER_2));
-    assertFalse(sendFileApi.hasPendingTransfers());
+    ((FakeApiClient) apiClient).setIncomingFileName(FAKE_FILE_1).setSender(FAKE_SENDER_1);
+    assertTrue(apiClient.hasPendingTransfers());
+    assertEquals(apiClient.getNextPendingFile(), new PendingFile(FAKE_FILE_1, FAKE_SENDER_1));
+    assertFalse(apiClient.hasPendingTransfers());
+    ((FakeApiClient) apiClient).setIncomingFileName(FAKE_FILE_2).setSender(FAKE_SENDER_2);
+    assertTrue(apiClient.hasPendingTransfers());
+    assertEquals(apiClient.getNextPendingFile(), new PendingFile(FAKE_FILE_2, FAKE_SENDER_2));
+    assertFalse(apiClient.hasPendingTransfers());
   }
 
   @Test
-  public void testSendReceiveAll() throws Exception {
-    for (String s : (ArrayList<String>)testFiles) {
+  public void testSendReceiveAll() {
+    for (String s : (ArrayList<String>) testFiles) {
       System.out.println("file: " + s);
-      ((FakeSendFileApi) sendFileApi).setSender(new InetSocketAddress(LOCALHOST,
+      ((FakeApiClient) apiClient).setSender(new InetSocketAddress(LOCALHOST,
           LOCALPORT)).setIncomingFileName(s + incrAppend());
       PendingFile pendingFile = new PendingFile(TEST_PATH + s, new InetSocketAddress(LOCALHOST,
           LOCALPORT));
-      Thread sendAction = new Thread(new SendAction(pendingFile));
-      synchronized (sendAction){
-        sendAction.start();
-        sendAction.wait(TIMEOUT_MS);
+      try {
+        SendAction sendAction = new SendAction(pendingFile);
+
+        synchronized (sendAction) {
+//          while(sendAction.isSending())
+          if(s.equals("img.png"))
+            System.out.println("Second run");
+          sendAction.wait();
+        }
+      } catch (Throwable e) {
+        System.out.println("Exception caught");
+        e.printStackTrace();
       }
+
 
       File file = new File(s + fileAppend);
       assertTrue(file.exists());
@@ -83,7 +92,7 @@ public class ReceiveActionTest {
 
 //  @Test
 //  public void testReceiveBasic() throws Exception {
-//      ((FakeSendFileApi) sendFileApi).setSender(new InetSocketAddress(LOCALHOST,
+//      ((FakeApiClient) apiClient).setSender(new InetSocketAddress(LOCALHOST,
 //          LOCALPORT)).setIncomingFileName(BASIC_FILE_NAME + incrAppend());
 //      PendingFile pendingFile = new PendingFile(TEST_PATH + BASIC_FILE_NAME,
 //          new InetSocketAddress(LOCALHOST, LOCALPORT));

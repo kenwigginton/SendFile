@@ -1,9 +1,9 @@
 package com.kwiggint.sendfile.model;
 
+import org.bouncycastle.crypto.digests.SHA224Digest;
+
 import java.io.File;
 import java.net.InetSocketAddress;
-
-import static org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 
 /**
  * Model that represents a pending file transfer. Is applicable to both sender and recipient, but
@@ -23,7 +23,7 @@ public class PendingFile {
    * SHA3 Hash of the original source file.  Intended for comparison to the final received file
    * for validity.
    */
-  private DigestSHA3 fileHash;
+  private SHA224Digest fileHash;
   /** Long representation of the file's intended size in KiloBytes. */
   private long fileSize;
 
@@ -32,7 +32,7 @@ public class PendingFile {
     this.sender = sender;
   }
 
-  public PendingFile(String fileName, DigestSHA3 fileHash, long fileSize,
+  public PendingFile(String fileName, SHA224Digest fileHash, long fileSize,
                      InetSocketAddress sender) {
     this.fileName = fileName;
     this.fileHash = fileHash;
@@ -44,7 +44,7 @@ public class PendingFile {
     return fileName;
   }
 
-  public DigestSHA3 getFileHash() {
+  public SHA224Digest getFileHash() {
     return fileHash;
   }
 
@@ -56,11 +56,7 @@ public class PendingFile {
     return sender;
   }
 
-  /**
-   *
-   *
-   * @return true if the file exists.
-   */
+  /** @return true if the file exists. */
   public boolean exists() {
     return new File(fileName).exists();
   }

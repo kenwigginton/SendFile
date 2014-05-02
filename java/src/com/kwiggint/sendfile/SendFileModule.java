@@ -2,10 +2,10 @@ package com.kwiggint.sendfile;
 
 import com.google.inject.AbstractModule;
 import com.kwiggint.sendfile.action.SendAction;
-import com.kwiggint.sendfile.api.FakeApiClient;
 import com.kwiggint.sendfile.api.ApiClient;
-import com.kwiggint.sendfile.monitor.FakeFileMonitor;
+import com.kwiggint.sendfile.api.RealApiClient;
 import com.kwiggint.sendfile.monitor.FileMonitor;
+import com.kwiggint.sendfile.monitor.RealFileMonitor;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -18,13 +18,13 @@ import java.util.Map;
 import java.util.Set;
 
 /** Fake Guice module that binds all necessary fake classes. */
-public class FakeSendFileModule extends AbstractModule {
+public class SendFileModule extends AbstractModule {
   private static final String CONFIG_LOCATION = "java/src/resources/config.yaml";
 
   @Override
   protected void configure() {
-    bind(FileMonitor.class).to(FakeFileMonitor.class);
-    bind(ApiClient.class).to(FakeApiClient.class);
+    bind(FileMonitor.class).to(RealFileMonitor.class);
+    bind(ApiClient.class).to(RealApiClient.class);
 
     // TODO: move configuration code to separate entity.
     // Load configuration files.

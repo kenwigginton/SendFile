@@ -21,9 +21,12 @@ public class SendAction implements Runnable {
   @Inject @ConfigValue("send_chunk_size")
   private static int dataChunkSize;
   private final PendingFile pendingFile;
+  private boolean isSending;
+  private final Thread thread;
 
   /**
    * Constructor for a new SendAction that takes a {@link PendingFile} as argument. Since the
+   *
    *
    * @param pendingFile the file to be sent wrapped with sending information.
    *                    The file path must be specified completely either absolutely or relatively.
@@ -34,6 +37,9 @@ public class SendAction implements Runnable {
       throw new FileNotFoundException("Cannot send file " + pendingFile.getFileName() +
           " because it doesn't exist.");
     this.pendingFile = pendingFile;
+    this.thread = new Thread(this);
+    this.isSending = true;
+    this.thread.start();
   }
 
   /**
@@ -62,6 +68,7 @@ public class SendAction implements Runnable {
    */
   public synchronized void run() {
     try {
+      isSending = true;
       ServerSocket serverSocket = new ServerSocket(pendingFile.getSender().getPort());
       serverSocket.setSoTimeout(socketTimeoutMillis);
       // Blocks until a connection is made on specified socket or until TIMEOUT is reached.
@@ -70,9 +77,15 @@ public class SendAction implements Runnable {
       OutputStream outputStream = socket.getOutputStream();
       sendByteArray(new RandomAccessFile(pendingFile.getFileName(), "r"), outputStream);
       serverSocket.close();
-      notify();
     } catch (IOException e) {
       System.err.println(e); // TODO log error appropriately
+    } finally {
+      notifyAll();
+      isSending = false;
     }
+  }
+
+  public boolean isSending() {
+    return isSending;
   }
 }
